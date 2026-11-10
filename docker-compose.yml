@@ -1,0 +1,36 @@
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysql_agenda
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_agenda
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  tomcat:
+    build: .
+    container_name: tomcat_agenda
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./target/ROOT.war:/usr/local/tomcat/webapps/ROOT.war
+    develop:
+      watch:
+        - action: sync
+          path: ./src/main/webapp
+          target: /usr/local/tomcat/webapps/ROOT/
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

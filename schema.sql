@@ -1,0 +1,7 @@
+CREATE TABLE contatos (
+    idcon INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    fone VARCHAR(20) NOT NULL,
+    email VARCHAR(50)
+);
+

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* --- Reset e Estilos Globais --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- Container do Formulário --- */
+        .form-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* --- Título --- */
+        .form-titulo {
+            font-size: 1.75rem;
+            color: #111827;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* --- Etiquetas (Labels) --- */
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        /* --- Campos de Entrada (Inputs) --- */
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #1f2937;
+            background-color: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Classe utilitária caso o input esteja com erro */
+        .form-input.input-erro {
+            border-color: #ef4444;
+        }
+        
+        .form-input.input-erro:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        /* --- Mensagens de Erro --- */
+        .error-message {
+            display: none;
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* --- Botão Enviar (Submit) --- */
+        .btn-salvar {
+            width: 100%;
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-salvar:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-salvar:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Loading Overlay --- */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px; color: #1f2937;">Salvando...</p>
+    </div>
+    <div class="form-container">
+        <h1 class="form-titulo">Criar novo contato</h1>
+        <form name="frmContato" action="insert">
+            <label for="nome" class="form-label">Nome:</label>
+            <input type="text" id="nome" name="nome" class="form-input" required>
+            <span id="error-nome" class="error-message">Por favor, insira um nome válido.</span>
+            <br><br>
+
+            <label for="telefone" class="form-label">Telefone:</label>
+            <input type="text" id="telefone" name="telefone" class="form-input" required>
+            <span id="error-telefone" class="error-message">Por favor, insira um telefone válido.</span>
+            <br><br>
+
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" id="email" name="email" class="form-input">
+            <span id="error-email" class="error-message">Por favor, insira um formato de e-mail válido.</span>
+            <br><br>
+
+            <input type="submit" value="Salvar" class="btn-salvar" id="validar">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('validar').addEventListener('click', function(event) {
+            // Inputs
+            const nomeInput = document.getElementById('nome');
+            const telefoneInput = document.getElementById('telefone');
+            const emailInput = document.getElementById('email');
+
+            // Elements de erro
+            const errorNome = document.getElementById('error-nome');
+            const errorTelefone = document.getElementById('error-telefone');
+            const errorEmail = document.getElementById('error-email');
+
+            // Valores limpos
+            const nomeValue = nomeInput.value.trim();
+            const telefoneValue = telefoneInput.value.trim();
+            const emailValue = emailInput.value.trim();
+
+            // Variável para controlar se o formulário está 100% válido
+            let formValido = true;
+
+            // Limpa os erros anteriores antes de validar novamente
+            [nomeInput, telefoneInput, emailInput].forEach(input => input.classList.remove('input-erro'));
+            [errorNome, errorTelefone, errorEmail].forEach(err => err.style.display = 'none');
+
+            // 1. Validação do Nome
+            if (nomeValue === "") {
+                nomeInput.classList.add('input-erro');
+                errorNome.style.display = 'block';
+                if (formValido) nomeInput.focus();
+                formValido = false;
+            }
+
+            // 2. Validação do Telefone
+            if (telefoneValue === "") {
+                telefoneInput.classList.add('input-erro');
+                errorTelefone.style.display = 'block';
+                if (formValido) telefoneInput.focus();
+                formValido = false;
+            }
+
+            // 3. Validação do E-mail (Apenas se digitado)
+            if (emailValue !== "") {
+                const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!regexEmail.test(emailValue)) {
+                    emailInput.classList.add('input-erro');
+                    errorEmail.style.display = 'block';
+                    if (formValido) emailInput.focus();
+                    formValido = false;
+                }
+            }
+
+            // Se qualquer campo falhou na validação, impede o envio para o Java
+            if (!formValido) {
+                event.preventDefault();
+            } else {
+                // Se válido, mostra o overlay
+                document.getElementById('loading-overlay').style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Build output
+target/
+.mvn/
+
+# IDE files
+.settings/
+.classpath
+.project
+.metadata/
+*.iml
+.idea/
+
+# Local environment
+.env
+docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
